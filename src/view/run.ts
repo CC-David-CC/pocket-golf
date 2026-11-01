@@ -246,6 +246,7 @@ export async function startView(host: Host, signal: AbortSignal): Promise<ViewHa
     playButton.disabled = busy || (!session.paused && !session.complete) || (session.complete && session.mode === "practice" && !!session.finished);
     pauseButton.disabled = busy || session.paused;
     resetButton.disabled = busy || session.rolling;
+    holeSelect.disabled = busy || session.rolling;
     nextButton.disabled = busy || !session.complete;
     openButton.disabled = busy;
     saveButton.disabled = busy;
@@ -402,18 +403,28 @@ export async function startView(host: Host, signal: AbortSignal): Promise<ViewHa
   volume.addEventListener("input", () => chooseSettings(() => {}));
   reducedMotion.addEventListener("change", () => chooseSettings(() => {}));
   highContrast.addEventListener("change", () => chooseSettings(() => {}));
-  holeSelect.addEventListener("change", () => {
-    if (busy || session.rolling) {
-      holeSelect.value = session.mode === "practice" ? "practice" : String(session.holeIndex);
-      return;
-    }
-    session.selectHole(holeSelect.value === "practice" ? "practice" : Number(holeSelect.value));
-    rebuildHole();
-    updatePhysicsStep();
-    setDirty(true);
-    refresh();
-    announce(session.mode === "practice" ? "Practice green ready." : `Hole ${session.hole.id} ready.`);
-  });
+  holeSelect.addEventListener("change", () => { void selectHole(); });
+  async function selectHole(): Promise<void> {
+    const chosen = holeSelect.value;
+    const current = () => session.mode === "practice" ? "practice" : String(session.holeIndex);
+    if (busy || !valid() || session.rolling) { holeSelect.value = current(); return; }
+    if (chosen === current()) return;
+    const live = session, atRevision = revision;
+    busy = true;
+    session.pause(); cancelAim(); updatePhysicsStep(); refresh();
+    try {
+      if (windowState.dirty && !await host.ui.confirm?.("Change holes and discard unsaved progress at the current lie?", {
+        title: "Unsaved golf progress", confirmLabel: "Change hole", cancelLabel: "Keep current hole", danger: true, signal,
+      })) { holeSelect.value = current(); announce("Current hole kept and paused."); return; }
+      if (!valid()) return;
+      if (session !== live || revision !== atRevision) { holeSelect.value = current(); announce("The round changed while confirming; try again."); return; }
+      session.selectHole(chosen === "practice" ? "practice" : Number(chosen));
+      rebuildHole(); updatePhysicsStep(); setDirty(true); refresh();
+      announce(session.mode === "practice" ? "Practice green ready." : `Hole ${session.hole.id} ready.`);
+    } catch (error) {
+      holeSelect.value = current(); announce("Could not change hole: " + (error instanceof Error ? error.message : "unknown error"));
+    } finally { busy = false; refresh(); }
+  }
 
   function aimDirection(): Vector3 {
     return new Vector3(Math.sin(aimAngle), 0, Math.cos(aimAngle));
@@ -588,7 +599,7 @@ export async function startView(host: Host, signal: AbortSignal): Promise<ViewHa
         host.w.title = target.split("/").pop() + " — Pocket Golf";
       }
       committed = true;
-      windowState.dirty = revision !== atRevision;
+      windowState.dirty = usedLastStable || revision !== atRevision;
       watch(context, target, result.version);
       announce(result.status === "conflict"
         ? "Checkpoint saved locally with conflicting copies. Resolve them in Files."

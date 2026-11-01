@@ -22,7 +22,8 @@ files** storage.
 Checkpoints are `.game.json` files with app ID `pocket-golf`. When the ball is
 settled, Save records the current lie. If Save is selected during a roll, it
 writes the last settled checkpoint and says that the current roll was not
-included. Loading restores the round paused.
+included. The current roll remains marked unsaved, so closing asks for
+confirmation. Changing holes with unsaved progress also asks first. Loading restores the round paused.
 
 The current preview uses a clearly labeled procedural caddie and score stand.
 `golf-scoreboard.riv` remains an acceptance-gated asset. Physical-phone input,
@@ -49,3 +50,7 @@ CODI_PHONE=1 node tests/pocket-golf-browser.test.mjs
 
 The registered-account test must run against a preview bundle that includes
 Files and a parent integration branch that registers the `pocket-golf` app ID.
+
+The isolated `tests/pocket-golf-rolling-save-review.test.mjs` checks the
+in-flight save warning, last-settled sync/reopen, and canceled/confirmed hole
+switch on desktop and emulated phone. Physical touch remains untested.
