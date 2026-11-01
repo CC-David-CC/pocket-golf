@@ -1,0 +1,123 @@
+{
+  "category": "03-babylon-xr-games",
+  "id": "pocket-golf",
+  "title": "Pocket Golf",
+  "genre": "3D miniature golf",
+  "pitch": "Play six compact holes with a clear aim guide, a readable power meter and physically simulated rolling balls.",
+  "capabilities": [
+    "Babylon physics plugin integration",
+    "PBR materials and readable shadows",
+    "Ray-to-surface aiming and in-world controls"
+  ],
+  "rules": [
+    "Ball must settle before next stroke. Drag defines bounded aim/power; release commits one stroke.",
+    "Hole capture requires position and speed conditions. Out-of-bounds restores last safe lie with a declared penalty.",
+    "Use Babylon Havok for this app only. Bind one stepping owner and qualify solver settings; do not run Rapier alongside it."
+  ],
+  "content": "Six handcrafted holes, one practice green and per-hole pars. No online leaderboard.",
+  "state": [
+    "hole id",
+    "stroke count and completed scorecard",
+    "last safe lie",
+    "ball logical lie at stable checkpoint",
+    "settings"
+  ],
+  "actions": [
+    {
+      "command": "aim-putt",
+      "desktop": "Drag from ball, release",
+      "phone": "Drag aim handle away from ball; explicit cancel",
+      "xr": "Ray-drag on green, or optional hand controller putter"
+    },
+    {
+      "command": "camera",
+      "desktop": "Orbit controls",
+      "phone": "Orbit outside aiming gesture",
+      "xr": "Natural head view; teleport to preset viewing points"
+    },
+    {
+      "command": "reset-lie",
+      "desktop": "Reset with penalty",
+      "phone": "Reset lie button",
+      "xr": "Scoreboard Reset control"
+    }
+  ],
+  "rive": {
+    "asset": "golf-scoreboard.riv",
+    "role": "Power meter, hole card and animated caddie on a world-space score stand.",
+    "properties": {
+      "power": "number 0..1",
+      "strokes": "integer",
+      "hole": "integer 1..6"
+    },
+    "events": [
+      "putt",
+      "sink",
+      "finish"
+    ],
+    "states": [
+      "ready",
+      "aim",
+      "roll",
+      "celebrate"
+    ],
+    "artboard": "Main",
+    "stateMachine": "Presentation",
+    "assetStatus": "to_author"
+  },
+  "polish": [
+    "Aim guide fades during motion",
+    "Scoring based on actual physics conditions",
+    "Nice feedback without screen flash; pause before file actions"
+  ],
+  "tests": [
+    "Repeated release creates one impulse/stroke.",
+    "Hole capture rejects high-speed grazing.",
+    "One owner steps physics; 60/90 Hz presentation does not double speed.",
+    "Save while rolling reports checkpoint semantics accurately.",
+    "Phone cancel does not launch.",
+    "XR scale does not alter selected putt energy in model coordinates."
+  ],
+  "loop": [
+    "accept aim only when ball settled",
+    "commit stroke/impulse atomically",
+    "let the verified Babylon physics scheduler step once",
+    "observe speed/goal conditions",
+    "commit stable lie and scorecard checkpoint",
+    "drive Rive power/score presentation"
+  ],
+  "save": "Checkpoint save at settled lie or completed hole. During roll, Save offers the last stable checkpoint and labels it; XR transitions still preserve live physics.",
+  "wave": 3,
+  "xr_mode": "tabletop",
+  "xr_presentation": "Miniature course in AR or VR, not a requirement to walk a life-size golf course.",
+  "comfort": "Reachable ray aiming and fixed/tabletop viewing. Optional physical putting cannot be the only way to play.",
+  "scope": "Havok integration is a review gate: the web runtime is distributed under MIT, but this is not a claim that the full Havok engine source is public. See source/licensing notes.",
+  "specVersion": 1,
+  "status": "planned",
+  "implementation": "not_started",
+  "runtimeTests": "not_run",
+  "engine": "Babylon.js",
+  "singlePlayer": true,
+  "phoneRequired": true,
+  "mountContract": {
+    "export": "mount",
+    "synchronous": true,
+    "returns": [
+      "element",
+      "dispose"
+    ],
+    "productionEntry": "index.mjs",
+    "suppliedEntry": "index.pseudo.mjs"
+  },
+  "xrRequired": true,
+  "riveRequired": true,
+  "riveAssetIncluded": false,
+  "documentKind": "Checkpoint save at settled lie or completed hole. During roll, Save offers the last stable checkpoint and labels it; XR transitions still preserve live physics.",
+  "sources": [
+    "S09",
+    "S10",
+    "S11",
+    "S12",
+    "S13"
+  ]
+}
