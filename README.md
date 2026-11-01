@@ -1,47 +1,51 @@
 # Pocket Golf
 
-**3D miniature golf · Babylon.js · single-player · phone required · immersive XR required**
+Pocket Golf is a six-hole Babylon.js miniature-golf preview. It uses Havok's
+web runtime for the tabletop course, renders the game without an external
+asset service, and saves checkpoints through the signed-in desktop's **My
+files** storage.
 
-> Planned design, not implemented or browser-tested. `index.pseudo.mjs` is an explanatory entry point, not a playable game.
+## Controls
 
-## Experience
-
-Play six compact holes with a clear aim guide, a readable power meter and physically simulated rolling balls.
-
-## What this demonstrates
-
-- Babylon physics plugin integration
-- PBR materials and readable shadows
-- Ray-to-surface aiming and in-world controls
-
-## Rules and complete loop
-
-- Ball must settle before next stroke. Drag defines bounded aim/power; release commits one stroke.
-- Hole capture requires position and speed conditions. Out-of-bounds restores last safe lie with a declared penalty.
-- Use Babylon Havok for this app only. Bind one stepping owner and qualify solver settings; do not run Rapier alongside it.
-
-## Bounded polished release
-
-Six handcrafted holes, one practice green and per-hole pars. No online leaderboard.
-
-- Aim guide fades during motion
-- Scoring based on actual physics conditions
-- Nice feedback without screen flash; pause before file actions
-
-No multiplayer, accounts, server simulation or generic editor is required. Start, rules/help, play/activity, pause, outcome/goal feedback and retry must all be complete. Settings include volume/mute, reduced motion, contrast and game-specific options where meaningful. State changes occur in the game model; animations illustrate them.
-
-## Rive inside this app
-
-Power meter, hole card and animated caddie on a world-space score stand. The requested asset is `golf-scoreboard.riv`; it is **not included**. See [RIVE.md](RIVE.md) for the authoring/integration contract. A placeholder or unrelated animated logo does not satisfy this requirement.
+- Choose a hole or the practice green.
+- Choose **Start / resume**, then drag on the course to aim and release.
+- **Aim left**, **Aim right**, the power slider and **Putt** provide
+  keyboard, touch and assistive alternatives to dragging.
+- **Cancel aim** clears a pointer gesture without launching.
+- **Reset lie** restores the last safe lie and adds a one-stroke penalty.
+- Press Escape to pause; focus loss, minimizing, workspace changes, roll-up
+  and browser visibility changes also pause play.
+- **Enter XR** probes immersive VR/AR support when the browser exposes WebXR.
 
 ## Save behavior
 
-Checkpoint save at settled lie or completed hole. During roll, Save offers the last stable checkpoint and labels it; XR transitions still preserve live physics. See [SAVE.md](SAVE.md). Loading starts paused; resume is explicit. Entering/exiting XR preserves the live current state even when exported saves are checkpoints.
+Checkpoints are `.game.json` files with app ID `pocket-golf`. When the ball is
+settled, Save records the current lie. If Save is selected during a roll, it
+writes the last settled checkpoint and says that the current roll was not
+included. Loading restores the round paused.
 
-## Build sequence
+The current preview uses a clearly labeled procedural caddie and score stand.
+`golf-scoreboard.riv` remains an acceptance-gated asset. Physical-phone input,
+real Havok tuning beyond the bounded test course, a complete visual polish
+pass and Galaxy XR hardware verification remain open.
 
-Implement the rule loop in [gameplay.pseudo.txt](gameplay.pseudo.txt); bind the exact app lifecycle from [index.pseudo.mjs](index.pseudo.mjs); complete [CONTROLS.md](CONTROLS.md); author/integrate [RIVE.md](RIVE.md); then satisfy [ACCEPTANCE.md](ACCEPTANCE.md). The full XR flow and game-specific presentation are in [XR.md](XR.md).
+## Development
 
-Target wave: **3**. Integrator first reads [AGENTS.md](../../AGENTS.md); do not guess host APIs from symbolic helper names.
+```sh
+npm ci --prefix apps/system/pocket-golf --ignore-scripts
+npm run typecheck --prefix apps/system/pocket-golf
+npm test --prefix apps/system/pocket-golf
+```
 
-Havok integration is a review gate: the web runtime is distributed under MIT, but this is not a claim that the full Havok engine source is public. See source/licensing notes.
+Build a standalone fixture bundle from the repository root:
+
+```sh
+python3 active-system/scripts/build-public-apps.py --output .build/pocket-golf --apps pocket-golf
+CODI_POCKET_GOLF_MANIFEST=.build/pocket-golf/apps.json python3 tests/prepare-pocket-golf-harness.py
+python3 -m http.server 18320 --bind 127.0.0.1 --directory .build/pocket-golf
+node tests/pocket-golf-browser.test.mjs
+CODI_PHONE=1 node tests/pocket-golf-browser.test.mjs
+```
+
+The registered-account test must run against a preview bundle that includes
+Files and a parent integration branch that registers the `pocket-golf` app ID.

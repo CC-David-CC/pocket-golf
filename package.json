@@ -1,0 +1,18 @@
+{
+  "name": "codi-pocket-golf",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run tests"
+  },
+  "dependencies": {
+    "@babylonjs/core": "9.33.1",
+    "@babylonjs/havok": "1.3.14"
+  },
+  "devDependencies": {
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}
