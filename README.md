@@ -32,9 +32,9 @@ pass and Galaxy XR hardware verification remain open.
 ## Development
 
 ```sh
-npm ci --prefix apps/system/pocket-golf --ignore-scripts
-npm run typecheck --prefix apps/system/pocket-golf
-npm test --prefix apps/system/pocket-golf
+npm ci --prefix apps/games/03-babylon-xr-games/pocket-golf --ignore-scripts
+npm run typecheck --prefix apps/games/03-babylon-xr-games/pocket-golf
+npm test --prefix apps/games/03-babylon-xr-games/pocket-golf
 ```
 
 Build a standalone fixture bundle from the repository root:
