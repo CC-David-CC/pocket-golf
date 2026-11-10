@@ -54,3 +54,7 @@ Files and a parent integration branch that registers the `pocket-golf` app ID.
 The isolated `tests/pocket-golf-rolling-save-review.test.mjs` checks the
 in-flight save warning, last-settled sync/reopen, and canceled/confirmed hole
 switch on desktop and emulated phone. Physical touch remains untested.
+
+## Design requirements
+
+The original [design brief, controls, save rules, artwork and acceptance plans](design/README.md) are retained as reference. They describe targets; the implementation and qualification status above takes precedence.
