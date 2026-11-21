@@ -1,4 +1,4 @@
-import type {Host, ViewHandle} from "./view/run.js";
+import type {Host, ViewHandle} from "./view/run.ts";
 
 export interface PocketGolfMount {
   element: HTMLElement;
@@ -18,7 +18,7 @@ export function mount(host: Host): PocketGolfMount {
   if (host.signal?.aborted) abort();
 
   queueMicrotask(() => {
-    void import("./view/run.js").then(async ({startView}) => {
+    void import("./view/run.ts").then(async ({startView}) => {
       if (disposed || controller.signal.aborted) return;
       const candidate = await startView(host, controller.signal);
       if (disposed || controller.signal.aborted) {

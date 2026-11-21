@@ -1,11 +1,11 @@
-import {describe, expect, it} from "vitest";
+import {describe, expect, it} from "./test-shim.ts";
 import {
   CheckpointError,
   HOLES,
   PocketGolfSession,
   decodeCheckpoint,
   encodeCheckpoint,
-} from "../src/model/golf.js";
+} from "../src/model/golf.ts";
 
 function activeHole(index = 0): PocketGolfSession {
   const session = new PocketGolfSession("test");
